@@ -1,7 +1,0 @@
-
-
-- StartServer:
-    file: START.sh
-
-- StopServer:
-    file: STOP.sh

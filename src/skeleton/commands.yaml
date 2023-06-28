@@ -1,0 +1,7 @@
+
+
+- StartDesktop:
+    file: START_DESKTOP.sh
+
+- StopServer:
+    file: STOP_DESKTOP.sh
