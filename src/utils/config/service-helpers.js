@@ -44,7 +44,7 @@ export async function servicesFromConfig() {
       }
     });
   });
-
+  console.log(servicesArray);
   return servicesArray;
 }
 
@@ -125,7 +125,6 @@ export async function servicesFromDocker() {
       serverGroup.services.push(result);
     });
   });
-
   return mappedServiceGroups;
 }
 
