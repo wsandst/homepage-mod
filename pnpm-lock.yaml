@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@headlessui/react':
     specifier: ^1.7.2
@@ -34,6 +38,9 @@ dependencies:
   minecraft-ping-js:
     specifier: ^1.0.2
     version: 1.0.2
+  nano-id:
+    specifier: ^1.1.0
+    version: 1.1.0
   next:
     specifier: ^12.3.1
     version: 12.3.4(react-dom@18.2.0)(react@18.2.0)
@@ -2345,6 +2352,10 @@ packages:
     resolution: {integrity: sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ==}
     dev: false
     optional: true
+
+  /nano-id@1.1.0:
+    resolution: {integrity: sha512-vQB87xWh4CCBZq2d7/wF46uiwZOx+n6ShQ4QBuiejQhBSijkTeK6Ugv1EhgjVAg8fwIu9wtWk3GhCN4ViD0TJQ==}
+    dev: false
 
   /nanoid@3.3.6:
     resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}

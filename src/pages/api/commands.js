@@ -4,6 +4,7 @@ import createLogger from "utils/logger";
 
 import { promises as fs, createWriteStream, existsSync, readFileSync, unlinkSync } from "fs";
 import path from "path";
+import { nanoid } from 'nanoid'
 
 
 const logger = createLogger("commands");
@@ -56,18 +57,19 @@ export default async function handler(req, res) {
 
     console.log("Attempting to run command ", commandItem);
     console.log(`Configurated command as: '${commandString}'`);
+    const outputFile = `${group}-${command}-${nanoid(9)}-output.txt`
     const commandRunner = path.join(process.cwd(), "config", "commandrunner");
     var commandRunnerFile = createWriteStream(commandRunner);
-    commandRunnerFile.write(`${commandString}\n`);
+    commandRunnerFile.write(`${commandString} &> ../logs/${outputFile}\n`);
     commandRunnerFile.close();
 
     const timeout = 10000;
-    const outputPath = `./config/logs/output.txt`
+    const outputPath = `./config/logs/${outputFile}`
     const fileExists = await checkFileExist(outputPath, timeout);
 
     if (fileExists) {
       const data = readFileSync(outputPath).toString();
-      //unlinkSync(outputPath) //delete the output file
+      unlinkSync(outputPath) //delete the output file
       console.log("Command output: ", data) //log the output of the command
       return res.status(200).json({
           status: `command '${commandString}' completed`,
