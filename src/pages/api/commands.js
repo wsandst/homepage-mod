@@ -63,7 +63,7 @@ export default async function handler(req, res) {
     commandRunnerFile.write(`${commandString} &> ../logs/${outputFile}\n`);
     commandRunnerFile.close();
 
-    const timeout = 10000;
+    const timeout = 7000;
     const outputPath = `./config/logs/${outputFile}`
     const fileExists = await checkFileExist(outputPath, timeout);
 
@@ -77,7 +77,8 @@ export default async function handler(req, res) {
       }); 
     }
     else {
-      return res.status(200).json({
+      console.log("Command timed out!");
+      return res.status(400).json({
           status: `command '${commandString}' timed out after ${timeout} ms`,
       });
     }

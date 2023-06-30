@@ -27,3 +27,9 @@ Messages are sometimes lost when being sent through the named pipe, any way to f
 See script-helpers.js, scripts.js
 
 http://localhost:3000/api/commands?group=Desktop&command=StartServer&args=adbaba,secondy
+
+
+Improve interface:
+Add Processing symbol next to commands to know that they are being run. Then some indicator of how it went.
+Make buttons more visible. Highlight on hover.
+Add popup for arguments. Simple popup form.

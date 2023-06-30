@@ -6,15 +6,30 @@ import Block from "components/services/widget/block";
 import BlockButton from "components/services/widget/blockbutton";
 import useWidgetAPI from "utils/proxy/use-widget-api";
 
+import { useState } from 'react';
 
-// Fetcher implementation.
-// The extra argument will be passed via the `arg` property of the 2nd parameter.
-// In the example below, `arg` will be `'my_token'`
-async function runCommand(group, command) {
+
+const ButtonStates = {
+  Idle: 0,
+  Running: 1,
+  Success: 2,
+  Failure: 3
+}
+
+const ButtonStateColorMap = {
+  0: null,
+  1: "blue",
+  2: "green",
+  3: "rose"
+}
+
+async function runCommand(group, command, completeCallback) {
+    console.log(`/api/commands?group=${group}&command=${command}`);
     var res = await fetch(`/api/commands?group=${group}&command=${command}`, {
       method: 'GET',
     })
-    console.log(res);
+    completeCallback(res.status == 200);
+    console.log("Command result: ", res);
   }
   
 export default function Component({ service }) {
@@ -22,20 +37,27 @@ export default function Component({ service }) {
 
     const { widget } = service;
 
-    //const { data: statsData, error: statsError } = useWidgetAPI(widget, "device");
-    console.log(service);
-
-    //const { data: statsData, error: statsError } = useSWR(`/api/commands?/${widget.container}/${widget.server || ""}`);
-    //const { data: statsData, error: statsError } = useWidgetAPI(widget, "device");
-
     const commandGroup = service.commandgroup;
-    //const { trigger } = useSWRMutation('/api/commands', runCommand)
+    const buttonStates = widget.commands.map((cmd) => {
+      const [state, setState] = useState(ButtonStates.Idle);
+      return {state: state, setState: setState}
+    });
 
     return (
         <Container service={service}>
-        {widget.commands.map((cmd) =>
-             <BlockButton label={cmd.name} onClick={() => runCommand(commandGroup, cmd.name)} />
+        {widget.commands.map((cmd, i) =>
+             <BlockButton key={cmd.name} 
+                          running={buttonStates[i].state == ButtonStates.Running} 
+                          outlineColor={ButtonStateColorMap[buttonStates[i].state]}
+                          label={cmd.name} 
+                          onClick={() => {
+                            buttonStates[i].setState(ButtonStates.Running); 
+                            runCommand(commandGroup, cmd.name, (success) =>  {
+                                buttonStates[i].setState(success ? ButtonStates.Success : ButtonStates.Failure);
+                            });
+                          }} 
+            />
         )}
         </Container>
-    );
+    );Failure
 }

@@ -39,6 +39,9 @@ module.exports = {
   plugins: [tailwindForms, tailwindScrollbars],
   // always include these in build as classes are dynamically constructed
   safelist: [
+    'outline-blue-400',
+    'outline-rose-400',
+    'outline-green-400',
     'backdrop-blur',
     'backdrop-blur-sm',
     'backdrop-blur-md',
