@@ -21,21 +21,25 @@ export async function commandsFromConfig() {
   }
 
   // map easy to write YAML objects into easy to consume JS arrays
-  const commandsArray = commands.map((commandName) => ({
-    name: Object.keys(commandName)[0],
-    ...commandName[Object.keys(commandName)[0]],
-    type: 'commands'
+  const commandsArray = commands.map((commandGroup) => ({
+    name: Object.keys(commandGroup)[0],
+    commands: commandGroup[Object.keys(commandGroup)[0]].map((command) => ({
+      name: Object.keys(command)[0],
+      ...command[Object.keys(command)[0]],
+      type: 'commands'
+    })),
   }));
 
   return commandsArray;
 }
 
-export async function getCommandItem(commandItemName) {
+export async function getCommandItem(group, command) {
   const configuredCommands = await commandsFromConfig();
 
-  const command = configuredCommands.find((c) => c.name === commandItemName);
-  if (command) {
-    return command;
+  const commandGroup = configuredCommands.find((g) => g.name === group);
+  if (commandGroup) {
+    const commandEntry = commandGroup.commands.find((c) => c.name === command);
+    if (commandEntry) return commandEntry;
   }
 
   return false;
