@@ -12,6 +12,7 @@ import {
   servicesFromKubernetes
 } from "utils/config/service-helpers";
 import { cleanWidgetGroups, widgetsFromConfig } from "utils/config/widget-helpers";
+import { commandsFromConfig } from "./command-helpers";
 
 /**
  * Compares services by weight then by name.
@@ -65,6 +66,7 @@ export async function servicesResponse() {
   let discoveredKubernetesServices;
   let configuredServices;
   let initialSettings;
+  let configuredCommands;
 
   try {
     discoveredDockerServices = cleanServiceGroups(await servicesFromDocker());
@@ -101,85 +103,26 @@ export async function servicesResponse() {
     initialSettings = {};
   }
 
-  const mergedGroupsNames = [
-    ...new Set([
-      discoveredDockerServices.map((group) => group.name),
-      discoveredKubernetesServices.map((group) => group.name),
-      configuredServices.map((group) => group.name),
-    ].flat()),
-  ];
-
-  const sortedGroups = [];
-  const unsortedGroups = [];
-  const definedLayouts = initialSettings.layout ? Object.keys(initialSettings.layout) : null;
-
-  mergedGroupsNames.forEach((groupName) => {
-    const discoveredDockerGroup = discoveredDockerServices.find((group) => group.name === groupName) || { services: [] };
-    const discoveredKubernetesGroup = discoveredKubernetesServices.find((group) => group.name === groupName) || { services: [] };
-    const configuredGroup = configuredServices.find((group) => group.name === groupName) || { services: [] };
-
-    const mergedGroup = {
-      name: groupName,
-      services: [
-        ...discoveredDockerGroup.services,
-        ...discoveredKubernetesGroup.services,
-        ...configuredGroup.services
-      ].filter((service) => service)
-        .sort(compareServices),
-    };
-
-    if (definedLayouts) {
-      const layoutIndex = definedLayouts.findIndex(layout => layout === mergedGroup.name);
-      if (layoutIndex > -1) sortedGroups[layoutIndex] = mergedGroup;
-      else unsortedGroups.push(mergedGroup);
-    } else {
-      unsortedGroups.push(mergedGroup);
-    }
-  });
-
-  return [...sortedGroups.filter(g => g), ...unsortedGroups];
-}
-
-export async function scriptsResponse() {
-  let discoveredDockerServices;
-  let discoveredKubernetesServices;
-  let configuredServices;
-  let initialSettings;
-
   try {
-    discoveredDockerServices = cleanServiceGroups(await servicesFromDocker());
-    if (discoveredDockerServices?.length === 0) {
-      console.debug("No containers were found with homepage labels.");
-    }
+    configuredCommands = await commandsFromConfig();
   } catch (e) {
-    console.error("Failed to discover services, please check docker.yaml for errors or remove example entries.");
+    console.error("Failed to load commands.yaml, please check for errors");
     if (e) console.error(e.toString());
-    discoveredDockerServices = [];
+    configuredCommands = {};
   }
 
-  try {
-    discoveredKubernetesServices = cleanServiceGroups(await servicesFromKubernetes());
-  } catch (e) {
-    console.error("Failed to discover services, please check kubernetes.yaml for errors or remove example entries.");
-    if (e) console.error(e.toString());
-    discoveredKubernetesServices = [];
+  // Add data about commands to services
+  if (configuredCommands) {
+    configuredServices.forEach((g) => {
+      g.services.forEach((s) => {
+        console.log(s)
+        if (s.widget != null && s.widget.type == "commands") {
+          s.widget.commands = configuredCommands.find((group) => group.name == s.commandgroup).commands
+        }
+      });
+    })
   }
 
-  try {
-    configuredServices = cleanServiceGroups(await servicesFromConfig());
-  } catch (e) {
-    console.error("Failed to load services.yaml, please check for errors");
-    if (e) console.error(e.toString());
-    configuredServices = [];
-  }
-
-  try {
-    initialSettings = await getSettings();
-  } catch (e) {
-    console.error("Failed to load settings.yaml, please check for errors");
-    if (e) console.error(e.toString());
-    initialSettings = {};
-  }
 
   const mergedGroupsNames = [
     ...new Set([

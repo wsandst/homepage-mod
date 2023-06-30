@@ -4,7 +4,6 @@ import useWidgetAPI from "utils/proxy/use-widget-api";
 
 export default function Component({ service }) {
   const { widget } = service;
-
   const { data: containersData, error: containersError } = useWidgetAPI(widget, "docker/containers/json", {
     all: 1,
   });
