@@ -11,7 +11,7 @@ export default function BlockButton({ value, label, onClick, running, outlineCol
         , running ? " animate-pulse" : ""
         , outlineColor != null ? `outline outline-2 outline-${outlineColor}-400` : "")}
     >
-      <div className="font-bold text-xs uppercase my-1.5">{t(label)}</div>
+      <div className="font-bold flex-1 text-xs uppercase my-1.5">{t(label)}</div>
     </button>
   );
 }

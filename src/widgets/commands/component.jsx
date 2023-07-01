@@ -5,6 +5,7 @@ import Container from "components/services/widget/container";
 import Block from "components/services/widget/block";
 import BlockButton from "components/services/widget/blockbutton";
 import useWidgetAPI from "utils/proxy/use-widget-api";
+import Modal from "components/services/widget/commandmodal";
 
 import { useState } from 'react';
 
@@ -43,21 +44,31 @@ export default function Component({ service }) {
       return {state: state, setState: setState}
     });
 
+    const commands = [];
+    for (var i = 0; i < widget.commands.length; i+= 3) {
+      commands.push(widget.commands.slice(i, i+3))
+    }
+
     return (
-        <Container service={service}>
-        {widget.commands.map((cmd, i) =>
-             <BlockButton key={cmd.name} 
-                          running={buttonStates[i].state == ButtonStates.Running} 
-                          outlineColor={ButtonStateColorMap[buttonStates[i].state]}
-                          label={cmd.name} 
-                          onClick={() => {
-                            buttonStates[i].setState(ButtonStates.Running); 
-                            runCommand(commandGroup, cmd.name, (success) =>  {
-                                buttonStates[i].setState(success ? ButtonStates.Success : ButtonStates.Failure);
-                            });
-                          }} 
-            />
+      <div>
+        {commands.map((groupedCommands) =>
+          <Container service={service}>
+          <Modal show={false}></Modal>
+          {groupedCommands.map((cmd, i) =>
+              <BlockButton key={cmd.name} 
+                            running={buttonStates[i].state == ButtonStates.Running} 
+                            outlineColor={ButtonStateColorMap[buttonStates[i].state]}
+                            label={cmd.name} 
+                            onClick={() => {
+                              buttonStates[i].setState(ButtonStates.Running); 
+                              runCommand(commandGroup, cmd.name, (success) =>  {
+                                  buttonStates[i].setState(success ? ButtonStates.Success : ButtonStates.Failure);
+                              });
+                            }} 
+              />
+          )}
+          </Container>
         )}
-        </Container>
+      </div>
     );Failure
 }
