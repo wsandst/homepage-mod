@@ -28,6 +28,7 @@ async function checkFileExist(path, timeout) {
 
 export default async function handler(req, res) {
     const { group, command, args } = req.query;
+    console.log(req.query);
 
     const commandItem = await getCommandItem(group, command);
     if (!commandItem) {
@@ -39,17 +40,22 @@ export default async function handler(req, res) {
 
     // Sanitize arguments to prevent bash injection
     let commandString = commandItem.command;
+    let argError = false;
+    let argErrorStr = null;
     if (args) {
         let sanitizedArgs = []
         args.split(',').forEach((a) => {
-            const sanitizedArg = a.replace(/[^a-zA-Z0-9 ]*/g, '');
+            const sanitizedArg = a.replace(/[^a-zA-Z0-9 "]*/g, '');
             if (a != sanitizedArg) {
-                return res.status(400).send({
-                    error: `Command argument '${a}' contained illegal characters`,
-                });
+                argErrorStr = `Command argument '${a}' contained illegal characters`;
             }
             sanitizedArgs.push(sanitizedArg);
         })
+        if (argErrorStr != null) {
+            return res.status(400).send({
+                error: argErrorStr,
+            });
+        }
         sanitizedArgs.forEach((arg, index) => {
             commandString = commandString.replace(`$${index+1}`, arg);
         });

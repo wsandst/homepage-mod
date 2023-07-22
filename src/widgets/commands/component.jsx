@@ -24,10 +24,12 @@ const ButtonStateColorMap = {
   3: "rose"
 }
 
+// Run a command by calling the 'command' api endpoint, which allows
+// for the execution of predefined commands in the 'commands.yaml' config file
 async function runCommand(cmd, argumentValues, completeCallback) {
   let commandUrl = `/api/commands?group=${cmd.group}&command=${cmd.name}`;
   if (argumentValues != null) {
-    commandUrl += "&arguments=" + argumentValues.map((value) => `"${value}"`).join(',')
+    commandUrl += "&args=" + argumentValues.map((value) => `"${value}"`).join(',')
   }
   console.log("Command api url:", commandUrl);
   let res = await fetch(commandUrl, {
@@ -38,11 +40,10 @@ async function runCommand(cmd, argumentValues, completeCallback) {
 }
   
 export default function Component({ service }) {
-  const { t } = useTranslation();
-
   const { widget } = service;
-
   const commandGroup = service.commandgroup;
+
+  // Setup various states
   const buttonStates = widget.commands.map((cmd) => {
     const [state, setState] = useState(ButtonStates.Idle);
     return {state: state, setState: setState}
@@ -51,26 +52,38 @@ export default function Component({ service }) {
   const [modalShowState, setModalShowState] = useState(false);
   const [modalCmdState, setModalCmdState] = useState(null);
 
+  // Create rows of commands matching the optional service 'rows' attribute
+  // Defaults to 3 buttons per row
   const commands = [];
-  for (var i = 0; i < widget.commands.length; i+= 3) {
-    commands.push(widget.commands.slice(i, i+3))
+  const buttonsPerRow = service.rows == null ? 3 : service.rows;
+  for (var i = 0; i < widget.commands.length; i+= buttonsPerRow) {
+    commands.push(widget.commands.slice(i, i+buttonsPerRow))
   }
   
+  // Handle a command button being pressed
   const onCommandButtonPress = (cmd, i) => {
     if (cmd.arguments) {
+      // If the command requires arguments, provide a modal which allows for
+      // input of these arguments
+      cmd.index = i;
       setModalCmdState(cmd);
       setModalShowState(true);
     }
     else {
+      // Otherwise, just run the command
       buttonStates[i].setState(ButtonStates.Running); 
       runCommand(cmd, null, (success) =>  {
-          buttonStates[i].setState(success ? ButtonStates.Success : ButtonStates.Failure);
+        buttonStates[i].setState(success ? ButtonStates.Success : ButtonStates.Failure);
       });
     }
   }
 
   const onArgumentsSubmitted = (cmd, values) => {
-    runCommand(cmd, values, () => {});
+    // Callback from the arguments modal, once the arguments have been inputted
+    buttonStates[cmd.index].setState(ButtonStates.Running); 
+    runCommand(cmd, values, (success) =>  {
+      buttonStates[cmd.index].setState(success ? ButtonStates.Success : ButtonStates.Failure);
+  });
   }
 
   return (
@@ -84,11 +97,11 @@ export default function Component({ service }) {
         <Container service={service}>
         {groupedCommands.map((cmd, i) =>
             <BlockButton key={cmd.name} 
-                          running={buttonStates[j*3+i].state == ButtonStates.Running} 
-                          outlineColor={ButtonStateColorMap[buttonStates[j*3+i].state]}
+                          running={buttonStates[j*buttonsPerRow+i].state == ButtonStates.Running} 
+                          outlineColor={ButtonStateColorMap[buttonStates[j*buttonsPerRow+i].state]}
                           label={cmd.name} 
                           onClick={() => {
-                            onCommandButtonPress(cmd, j*3+i)
+                            onCommandButtonPress(cmd, j*buttonsPerRow+i)
                           }} 
             />
         )}
