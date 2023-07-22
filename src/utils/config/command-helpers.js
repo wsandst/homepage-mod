@@ -25,6 +25,7 @@ export async function commandsFromConfig() {
     name: Object.keys(commandGroup)[0],
     commands: commandGroup[Object.keys(commandGroup)[0]].map((command) => ({
       name: Object.keys(command)[0],
+      group: Object.keys(commandGroup)[0],
       ...command[Object.keys(command)[0]],
       type: 'commands'
     })),

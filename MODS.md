@@ -30,6 +30,5 @@ http://localhost:3000/api/commands?group=Desktop&command=StartServer&args=adbaba
 
 
 Improve interface:
-Add Processing symbol next to commands to know that they are being run. Then some indicator of how it went.
-Make buttons more visible. Highlight on hover.
-Add popup for arguments. Simple popup form.
+Improve appearance of form. Tie into pressing command buttons with arguments. Send callback into modal which
+is run with the args. Allow canceling
