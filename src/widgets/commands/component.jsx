@@ -1,10 +1,5 @@
-import { useTranslation } from "next-i18next";
-import useSWRMutation from 'swr'
-
 import Container from "components/services/widget/container";
-import Block from "components/services/widget/block";
 import BlockButton from "components/services/widget/blockbutton";
-import useWidgetAPI from "utils/proxy/use-widget-api";
 import Modal from "components/services/widget/commandmodal";
 
 import { useState } from 'react';

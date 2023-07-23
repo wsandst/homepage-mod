@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import classNames from "classnames";
+import { FaTimes } from "react-icons/fa";
 
 export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
   const fields = cmd == null ? [] : cmd.arguments;
@@ -40,7 +41,7 @@ export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
       <div className="flex justify-center h-screen items-center overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
         <div className="relative rounded w-full min-w-[80%] max-w-[90%] md:min-w-[35%] md:max-w-[35%] text-theme-700 dark:text-theme-200 dark:hover:text-theme-300 shadow-md shadow-theme-900/10 dark:shadow-theme-900/20 bg-theme-50 dark:bg-theme-800">
           <div className="flex-col w-fullrounded-md p-0 block font-medium ">
-            <div className="flex items-start justify-between p-5 border-b border-solid rounded-t">
+            <div className="flex items-center justify-between p-5 pr-7 pl-7 border-b border-solid rounded-t">
               <h3 className="text-3xl font=semibold">{title}</h3>
               <button
                 className="bg-transparent border-0 loat-right"
@@ -48,13 +49,12 @@ export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
                   setShow(false);
                 }}
               >
-                <span className="opacity-7 h-6 w-6 text-xl block py-0 rounded-full">
-                  x
-                </span>
+              <FaTimes className="text-theme-800 dark:text-theme-200 w-5 h-5"/>
               </button>
+              
             </div>
               <form className="shadow-md rounded px-8 pt-6 pb-8 w-full">
-              {fields.map((fieldName, index) =>
+              {fields.map((fieldName, index) => 
                 <div className="m-2">
                   <label className="block text-sm font-bold mb-1">
                     {fieldName}
