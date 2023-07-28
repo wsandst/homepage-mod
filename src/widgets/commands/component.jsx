@@ -1,6 +1,7 @@
 import Container from "components/services/widget/container";
 import BlockButton from "components/services/widget/blockbutton";
-import Modal from "components/services/widget/commandmodal";
+import ArgumentsModal from "components/services/widget/commandmodal";
+import ConfirmModal from "components/services/widget/confirmmodal";
 
 import { useState } from 'react';
 
@@ -21,7 +22,7 @@ const ButtonStateColorMap = {
 
 // Run a command by calling the 'command' api endpoint, which allows
 // for the execution of predefined commands in the 'commands.yaml' config file
-async function runCommand(cmd, argumentValues, completeCallback) {
+async function apiRunCommand(cmd, argumentValues, completeCallback) {
   let commandUrl = `/api/commands?group=${cmd.group}&command=${cmd.name}`;
   if (argumentValues != null) {
     commandUrl += "&args=" + argumentValues.map((value) => `"${value}"`).join(',')
@@ -44,8 +45,12 @@ export default function Component({ service }) {
     return {state: state, setState: setState}
   });
 
-  const [modalShowState, setModalShowState] = useState(false);
-  const [modalCmdState, setModalCmdState] = useState(null);
+  const [argumentsModalShowState, setArgumentsModalShowState] = useState(false);
+  const [argumentsModalCmdState, setArgumentsModalCmdState] = useState(null);
+
+  const [confirmModalShowState, setConfirmModalShowState] = useState(false);
+  const [confirmModalCmdState, setConfirmModalCmdState] = useState(null);
+
 
   // Create rows of commands matching the optional service 'rows' attribute
   // Defaults to 3 buttons per row
@@ -57,36 +62,44 @@ export default function Component({ service }) {
   
   // Handle a command button being pressed
   const onCommandButtonPress = (cmd, i) => {
+    console.log(cmd);
+    cmd.index = i;
     if (cmd.arguments) {
       // If the command requires arguments, provide a modal which allows for
       // input of these arguments
-      cmd.index = i;
-      setModalCmdState(cmd);
-      setModalShowState(true);
+      setArgumentsModalCmdState(cmd);
+      setArgumentsModalShowState(true);
+    }
+    else if (cmd.confirm) {
+      // If the command requires confirmation, provide a confirmation modal
+      setConfirmModalCmdState(cmd);
+      setConfirmModalShowState(true);
     }
     else {
       // Otherwise, just run the command
-      buttonStates[i].setState(ButtonStates.Running); 
-      runCommand(cmd, null, (success) =>  {
-        buttonStates[i].setState(success ? ButtonStates.Success : ButtonStates.Failure);
-      });
+      runCommand(cmd, null);
     }
   }
 
-  const onArgumentsSubmitted = (cmd, values) => {
-    // Callback from the arguments modal, once the arguments have been inputted
+  const runCommand = (cmd, values) => {
     buttonStates[cmd.index].setState(ButtonStates.Running); 
-    runCommand(cmd, values, (success) =>  {
+    apiRunCommand(cmd, values, (success) =>  {
       buttonStates[cmd.index].setState(success ? ButtonStates.Success : ButtonStates.Failure);
-  });
+    });
   }
+
 
   return (
     <div>
-      <Modal show={modalShowState} 
-              cmd={modalCmdState} 
-              setShow={setModalShowState} 
-              onSubmitCallback={onArgumentsSubmitted} 
+      <ArgumentsModal show={argumentsModalShowState} 
+              cmd={argumentsModalCmdState} 
+              setShow={setArgumentsModalShowState} 
+              onSubmitCallback={(cmd, values) => runCommand(cmd, values)} 
+      />
+      <ConfirmModal show={confirmModalShowState} 
+              cmd={confirmModalCmdState} 
+              setShow={setConfirmModalShowState} 
+              onConfirmCallback={(cmd) => runCommand(cmd, null)} 
       />
       {commands.map((groupedCommands, j) =>
         <Container service={service}>

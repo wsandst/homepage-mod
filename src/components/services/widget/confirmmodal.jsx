@@ -2,15 +2,8 @@ import React, { useEffect, useState } from "react";
 import classNames from "classnames";
 import { FaTimes } from "react-icons/fa";
 
-export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
-  const fields = cmd == null ? [] : cmd.arguments;
+export default function ConfirmModal({ show, cmd, setShow, onConfirmCallback }) {
   const title = cmd == null ? "" : `${cmd.group} - ${cmd.name}`
-  const fieldValues = Array(fields.length);
-
-  const onFieldChange = (index, value) => {
-    console.log(index, value);
-    fieldValues[index] = value;
-  }
 
   // Transition animation handling
   const [isInvisible, setIsInvisible] = useState(true);
@@ -51,18 +44,6 @@ export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
               </button>
               
             </div>
-              <form className="shadow-md rounded px-8 pt-6 pb-8 w-full">
-              {fields.map((fieldName, index) => 
-                <div className="m-2" key={fieldName}>
-                  <label className="block text-sm font-bold mb-1">
-                    {fieldName}
-                  </label>
-                  <input className="shadow appearance-none rounded w-full py-2 px-2 bg-theme-50 dark:bg-white/10"
-                        onChange={(e) => onFieldChange(index, e.target.value)}
-                  />
-                </div>
-              )}
-              </form>
             <div className="flex items-center justify-between p-6 border-t border-solid border-blueGray-200 rounded-b">
               <button
                 className="text-white bg-red-500 font-bold hover:bg-red-400 bfont-bold uppercase px-6 py-2 text-sm rounded outline-none focus:outline-none mr-1 mb-1"
@@ -78,7 +59,7 @@ export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
                 type="button"
                 onClick={() => {
                   setShow(false);
-                  onSubmitCallback(cmd, fieldValues)
+                  onConfirmCallback(cmd);
                 }}
               >
                 Run

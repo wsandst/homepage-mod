@@ -1,34 +1,28 @@
 TODO:
-- [] Improve tiling support
-- [] Add helper for matching on outputs better maybe?
-- [] Add script service which includes buttons
-
-Separate command output to allow for simultaneous running without colliding the output.
-
-https://stackoverflow.com/questions/32163955/how-to-run-shell-script-on-host-from-docker-container
+- [ ] Cleanup code, make the response include bash output
+- [ ] Add confirmation dialog perhaps?
+- [ ] Figure out how to package this version to the server. Docker script probs, then include in the other compose
+- [ ] Add the listening script to always be running as a service/cronjob
+- [ ] Setup all scripts and commands
 
 ## Scripts:
-### Computers:
-START_DESKTOP, STOP_DESKTOP, REBOOT_DESKTOP
-STOP_SERVER, REBOOT_SERVER
+### Desktop:
+START, STOP, REBOOT, BOOT WINDOWS
 
-## Media
-UNLOCK_DRIVE.sh
+### Server
+STOP, REBOOT, UNLOCK MEDIA
 
-### Tailscale:
-Restart tailscale, stop funnel, enable funnel
+STOP_SERVER, REBOOT_SERVER, UNLOCK DRIVE,
+RESTART FUNNEL, RESTART DOCKER, MOUNT KINDLE
 
-### AI
-START_KOHYA, STOP_KOHYA (service)
-START_AUTO1111, STOP_AUTO1111
+### KohyaSS
+START, STOP (setup service for this)
 
-
-Messages are sometimes lost when being sent through the named pipe, any way to fix this?
-See script-helpers.js, scripts.js
+### Auto1111
+START, STOP (setup service for this)
 
 http://localhost:3000/api/commands?group=Desktop&command=StartServer&args=adbaba,secondy
 
-
-Improve interface:
-Improve appearance of form. Tie into pressing command buttons with arguments. Send callback into modal which
-is run with the args. Allow canceling
+## Other
+Idea:
+On pressing a running command, open a log window which displays the progress of the command
