@@ -8,7 +8,6 @@ export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
   const fieldValues = Array(fields.length);
 
   const onFieldChange = (index, value) => {
-    console.log(index, value);
     fieldValues[index] = value;
   }
 

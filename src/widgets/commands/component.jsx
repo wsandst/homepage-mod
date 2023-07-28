@@ -1,7 +1,7 @@
 import Container from "components/services/widget/container";
 import BlockButton from "components/services/widget/blockbutton";
-import ArgumentsModal from "components/services/widget/commandmodal";
-import ConfirmModal from "components/services/widget/confirmmodal";
+import ArgumentsModal from "components/services/widget/modals/arguments";
+import ConfirmModal from "components/services/widget/modals/confirm";
 
 import { useState } from 'react';
 
@@ -32,7 +32,7 @@ async function apiRunCommand(cmd, argumentValues, completeCallback) {
     method: 'GET',
   })
   completeCallback(res.status == 200);
-  console.log("Command result: ", res);
+  console.log("Command result: ", await res.json());
 }
   
 export default function Component({ service }) {
