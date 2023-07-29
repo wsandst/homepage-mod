@@ -1,15 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import classNames from "classnames";
 import { FaTimes } from "react-icons/fa";
 
 export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
-  const fields = cmd == null ? [] : cmd.arguments;
   const title = cmd == null ? "" : `${cmd.group} - ${cmd.name}`
-  const fieldValues = Array(fields.length);
+
+  const [formFields, setFormFields] = useState([]);
 
   const onFieldChange = (index, value) => {
-    fieldValues[index] = value;
+    formFields[index].value = value;
+    setFormFields(formFields);
   }
+
+  useEffect(() => {
+    const fields = cmd == null ? [] : cmd.arguments;
+    setFormFields(fields.map((f) => ({name: f, value: ''})));
+  }, [cmd]);
 
   // Transition animation handling
   const [isInvisible, setIsInvisible] = useState(true);
@@ -51,14 +57,14 @@ export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
               
             </div>
               <form className="shadow-md rounded px-8 pt-6 pb-8 w-full">
-              {fields.map((fieldName, index) => 
-                <div className="m-2" key={fieldName}>
-                  <label htmlFor={`args-input-${fieldName}`}>
+              {formFields.map((field, index) => 
+                <div className="m-2" key={field.name}>
+                  <label htmlFor={`args-input-${field.name}`}>
                     <div className="block text-sm font-bold mb-1">                    
-                      {fieldName}
+                      {field.name}
                     </div>
-                    <input id={`args-input-${fieldName}`} type="text" className="shadow appearance-none rounded w-full py-2 px-2 bg-theme-50 dark:bg-white/10"
-                        onChange={(e) => onFieldChange(index, e.target.value)}
+                    <input id={`args-input-${field.name}`} type="text" className="shadow appearance-none rounded w-full py-2 px-2 bg-theme-50 dark:bg-white/10"
+                      onChange={(e) => onFieldChange(index, e.target.value)}
                     />
                   </label>
                 </div>
@@ -79,7 +85,7 @@ export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
                 type="button"
                 onClick={() => {
                   setShow(false);
-                  onSubmitCallback(cmd, fieldValues)
+                  onSubmitCallback(cmd, formFields.map((f) => f.value))
                 }}
               >
                 Run
