@@ -24,7 +24,7 @@ export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
       setTimeout(() => {setIsHidden(true); setShow(false)}, 300);
     }
 
-  }, [isInvisible, isHidden, show]);
+  }, [isInvisible, isHidden, show, setShow]);
 
 
   return (
@@ -40,7 +40,7 @@ export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
           <div className="flex-col w-fullrounded-md p-0 block font-medium ">
             <div className="flex items-center justify-between p-5 pr-7 pl-7 border-b border-solid rounded-t">
               <h3 className="text-3xl font=semibold">{title}</h3>
-              <button
+              <button type='button'
                 className="bg-transparent border-0 loat-right"
                 onClick={() => { 
                   setShow(false);
@@ -53,12 +53,14 @@ export default function CommandModal({ show, cmd, setShow, onSubmitCallback }) {
               <form className="shadow-md rounded px-8 pt-6 pb-8 w-full">
               {fields.map((fieldName, index) => 
                 <div className="m-2" key={fieldName}>
-                  <label className="block text-sm font-bold mb-1">
-                    {fieldName}
-                  </label>
-                  <input className="shadow appearance-none rounded w-full py-2 px-2 bg-theme-50 dark:bg-white/10"
+                  <label htmlFor={`args-input-${fieldName}`}>
+                    <div className="block text-sm font-bold mb-1">                    
+                      {fieldName}
+                    </div>
+                    <input id={`args-input-${fieldName}`} type="text" className="shadow appearance-none rounded w-full py-2 px-2 bg-theme-50 dark:bg-white/10"
                         onChange={(e) => onFieldChange(index, e.target.value)}
-                  />
+                    />
+                  </label>
                 </div>
               )}
               </form>

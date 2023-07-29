@@ -3,10 +3,7 @@ import path from "path";
 
 import yaml from "js-yaml";
 
-import createLogger from "utils/logger";
 import checkAndCopyConfig, { substituteEnvironmentVars } from "utils/config/config";
-
-const logger = createLogger("command-helpers");
 
 export async function commandsFromConfig() {
   checkAndCopyConfig("commands.yaml");

@@ -1,9 +1,9 @@
+import { useState } from 'react';
+
 import Container from "components/services/widget/container";
 import BlockButton from "components/services/widget/blockbutton";
 import ArgumentsModal from "components/services/widget/modals/arguments";
 import ConfirmModal from "components/services/widget/modals/confirm";
-
-import { useState } from 'react';
 
 
 const ButtonStates = {
@@ -25,25 +25,27 @@ const ButtonStateColorMap = {
 async function apiRunCommand(cmd, argumentValues, completeCallback) {
   let commandUrl = `/api/commands?group=${cmd.group}&command=${cmd.name}`;
   if (argumentValues != null) {
-    commandUrl += "&args=" + argumentValues.map((value) => `"${value}"`).join(',')
+    commandUrl += `&args=${argumentValues.map((value) => `"${value}"`).join(',')}`
   }
   console.log("Command api url:", commandUrl);
-  let res = await fetch(commandUrl, {
+  const res = await fetch(commandUrl, {
     method: 'GET',
   })
-  completeCallback(res.status == 200);
+  completeCallback(res.status === 200);
   console.log("Command result: ", await res.json());
 }
   
 export default function Component({ service }) {
   const { widget } = service;
-  const commandGroup = service.commandgroup;
 
+  
   // Setup various states
-  const buttonStates = widget.commands.map((cmd) => {
+  /* eslint-disable */
+  const buttonStates = widget.commands.map(() => {
     const [state, setState] = useState(ButtonStates.Idle);
-    return {state: state, setState: setState}
+    return {state, setState}
   });
+  /* eslint-enable */
 
   const [argumentsModalShowState, setArgumentsModalShowState] = useState(false);
   const [argumentsModalCmdState, setArgumentsModalCmdState] = useState(null);
@@ -56,14 +58,22 @@ export default function Component({ service }) {
   // Defaults to 3 buttons per row
   const commands = [];
   const buttonsPerRow = service.rows == null ? 3 : service.rows;
-  for (var i = 0; i < widget.commands.length; i+= buttonsPerRow) {
+  for (let i = 0; i < widget.commands.length; i += buttonsPerRow) {
     commands.push(widget.commands.slice(i, i+buttonsPerRow))
   }
   
+  const runCommand = (cmd, values) => {
+    buttonStates[cmd.index].setState(ButtonStates.Running); 
+    apiRunCommand(cmd, values, (success) =>  {
+      buttonStates[cmd.index].setState(success ? ButtonStates.Success : ButtonStates.Failure);
+    });
+  }
+
   // Handle a command button being pressed
   const onCommandButtonPress = (cmd, i) => {
     console.log(cmd);
-    cmd.index = i;
+    const cmdCopy = cmd;
+    cmdCopy.index = i;
     if (cmd.arguments) {
       // If the command requires arguments, provide a modal which allows for
       // input of these arguments
@@ -81,14 +91,6 @@ export default function Component({ service }) {
     }
   }
 
-  const runCommand = (cmd, values) => {
-    buttonStates[cmd.index].setState(ButtonStates.Running); 
-    apiRunCommand(cmd, values, (success) =>  {
-      buttonStates[cmd.index].setState(success ? ButtonStates.Success : ButtonStates.Failure);
-    });
-  }
-
-
   return (
     <div>
       <ArgumentsModal show={argumentsModalShowState} 
@@ -102,10 +104,10 @@ export default function Component({ service }) {
               onConfirmCallback={(cmd) => runCommand(cmd, null)} 
       />
       {commands.map((groupedCommands, j) =>
-        <Container service={service}>
+        <Container service={service} key={`${groupedCommands.map((c) => c.name).join('')}`} >
         {groupedCommands.map((cmd, i) =>
-            <BlockButton key={cmd.name} 
-                          running={buttonStates[j*buttonsPerRow+i].state == ButtonStates.Running} 
+            <BlockButton key={`${cmd.group}-${cmd.name}`} 
+                          running={buttonStates[j*buttonsPerRow+i].state === ButtonStates.Running} 
                           outlineColor={ButtonStateColorMap[buttonStates[j*buttonsPerRow+i].state]}
                           label={cmd.name} 
                           onClick={() => {

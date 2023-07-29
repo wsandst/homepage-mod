@@ -1,7 +1,8 @@
 TODO:
-- [ ] Cleanup code, make the response include bash output
-- [ ] Add confirmation dialog perhaps?
-- [ ] Figure out how to package this version to the server. Docker script probs, then include in the other compose
+- [X] Cleanup code, make the response include bash output
+- [X] Add confirmation dialog perhaps?
+- [X] Figure out how to package this version to the server. Docker script probs, then include in the other compose
+- [ ] BUG: Sometimes the arguments are not included in the API call, why?
 - [ ] Add the listening script to always be running as a service/cronjob
 - [ ] Setup all scripts and commands
 

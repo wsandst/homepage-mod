@@ -28,6 +28,7 @@ COPY --link --from=deps /app/node_modules ./node_modules/
 COPY . .
 
 SHELL ["/bin/ash", "-xeo", "pipefail", "-c"]
+
 RUN npm run telemetry \
  && mkdir config \
  && NEXT_PUBLIC_BUILDTIME=$BUILDTIME NEXT_PUBLIC_VERSION=$VERSION NEXT_PUBLIC_REVISION=$REVISION npm run build
@@ -48,6 +49,7 @@ WORKDIR /app
 # Copy files from context (this allows the files to copy before the builder stage is done).
 COPY --link --chown=1000:1000 package.json next.config.js ./
 COPY --link --chown=1000:1000 /public ./public/
+
 
 # Copy files from builder
 COPY --link --from=builder --chown=1000:1000 /app/.next/standalone ./

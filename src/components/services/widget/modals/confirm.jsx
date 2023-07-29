@@ -18,7 +18,7 @@ export default function ConfirmModal({ show, cmd, setShow, onConfirmCallback }) 
       setTimeout(() => {setIsHidden(true); setShow(false)}, 300);
     }
 
-  }, [isInvisible, isHidden, show]);
+  }, [isInvisible, isHidden, show, setShow]);
 
 
   return (
@@ -34,7 +34,7 @@ export default function ConfirmModal({ show, cmd, setShow, onConfirmCallback }) 
           <div className="flex-col w-fullrounded-md p-0 block font-medium ">
             <div className="flex items-center justify-between p-5 pr-7 pl-7 border-b border-solid rounded-t">
               <h3 className="text-3xl font=semibold">{title}</h3>
-              <button
+              <button type='button'
                 className="bg-transparent border-0 loat-right"
                 onClick={() => { 
                   setShow(false);
