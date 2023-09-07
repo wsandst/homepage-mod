@@ -1,0 +1,1 @@
+ssh dross "tailscale funnel 443 off && tailscale serve reset"

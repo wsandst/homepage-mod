@@ -1,1 +1,0 @@
-ssh desktop "sudo reboot now"
