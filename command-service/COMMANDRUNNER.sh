@@ -1,8 +1,9 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 
-REPO="REPO_LOCATION_TEMPLATE"
-cd $REPO/config/scripts
+# Template is replaced by the INSTALL.sh script
+HOMEPAGE_CONFIG_DIR="HOMEPAGE_CONFIG_DIR_TEMPLATE"
+cd $HOMEPAGE_CONFIG_DIR/scripts
 
 echo "Listening for commands sent from commandrunner FIFO..."
 while true; do 
