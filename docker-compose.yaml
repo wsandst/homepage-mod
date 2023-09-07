@@ -1,0 +1,10 @@
+version: "3.3"
+services:
+  homepage:
+    build:
+      context: .
+    container_name: homepage
+    ports:
+      - 3000:3000
+    volumes:
+      - ./config:/app/config # Make sure your local config directory exists

@@ -1,22 +1,24 @@
-
-import { getCommandItem } from "utils/config/command-helpers";
-import createLogger from "utils/logger";
-
-import { promises as fs, createWriteStream, existsSync, readFileSync, unlinkSync } from "fs";
+import { createWriteStream, existsSync, readFileSync, unlinkSync } from "fs";
 import path from "path";
-import { nanoid } from 'nanoid'
+
+/* eslint-disable */
+import { nanoid } from "nanoid"
+/* eslint-enable */
+
+import createLogger from "utils/logger";
+import { getCommandItem } from "utils/config/command-helpers";
 
 
 const logger = createLogger("commands");
 
-async function checkFileExist(path, timeout) {
+async function checkFileExist(filepath, timeout) {
     let totalTime = 0; 
-    let checkTime = timeout / 10;
+    const checkTime = timeout / 10;
 
-    return await new Promise((resolve, reject) => {
-        const timer = setInterval(function() {
+    return new Promise((resolve) => {
+        const timer = setInterval(() => {
             totalTime += checkTime;
-            let fileExists = existsSync(path);
+            const fileExists = existsSync(filepath);
     
             if (fileExists || totalTime >= timeout) {
                 clearInterval(timer);
@@ -28,6 +30,7 @@ async function checkFileExist(path, timeout) {
 
 export default async function handler(req, res) {
     const { group, command, args } = req.query;
+    console.log(req.query);
 
     const commandItem = await getCommandItem(group, command);
     if (!commandItem) {
@@ -39,17 +42,21 @@ export default async function handler(req, res) {
 
     // Sanitize arguments to prevent bash injection
     let commandString = commandItem.command;
+    let argErrorStr = null;
     if (args) {
-        let sanitizedArgs = []
+        const sanitizedArgs = []
         args.split(',').forEach((a) => {
-            const sanitizedArg = a.replace(/[^a-zA-Z0-9 ]*/g, '');
-            if (a != sanitizedArg) {
-                return res.status(400).send({
-                    error: `Command argument '${a}' contained illegal characters`,
-                });
+            const sanitizedArg = a.replace(/[^a-zA-Z0-9 "]*/g, '');
+            if (a !== sanitizedArg) {
+                argErrorStr = `Command argument '${a}' contained illegal characters`;
             }
             sanitizedArgs.push(sanitizedArg);
         })
+        if (argErrorStr != null) {
+            return res.status(400).send({
+                error: argErrorStr,
+            });
+        }
         sanitizedArgs.forEach((arg, index) => {
             commandString = commandString.replace(`$${index+1}`, arg);
         });
@@ -59,7 +66,7 @@ export default async function handler(req, res) {
     console.log(`Configurated command as: '${commandString}'`);
     const outputFile = `${group}-${command}-${nanoid(9)}-output.txt`
     const commandRunner = path.join(process.cwd(), "config", "commandrunner.pipe");
-    var commandRunnerFile = createWriteStream(commandRunner);
+    const commandRunnerFile = createWriteStream(commandRunner);
     commandRunnerFile.write(`${commandString} &> ../logs/${outputFile}\n`);
     commandRunnerFile.close();
 
@@ -69,17 +76,16 @@ export default async function handler(req, res) {
 
     if (fileExists) {
       const data = readFileSync(outputPath).toString();
-      unlinkSync(outputPath) //delete the output file
-      console.log("Command output: ", data) //log the output of the command
+      unlinkSync(outputPath) // Delete the output file
+      console.log("Command output: ", data) // Log the output of the command
       return res.status(200).json({
           status: `command '${commandString}' completed`,
           output: data,
       }); 
     }
-    else {
-      console.log("Command timed out!");
-      return res.status(400).json({
-          status: `command '${commandString}' timed out after ${timeout} ms`,
-      });
-    }
+
+    console.log("Command timed out!");
+    return res.status(400).json({
+        status: `command '${commandString}' timed out after ${timeout} ms`,
+    });
 }

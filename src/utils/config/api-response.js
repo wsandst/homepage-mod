@@ -4,6 +4,9 @@ import path from "path";
 
 import yaml from "js-yaml";
 
+import { commandsFromConfig } from "./command-helpers";
+
+
 import checkAndCopyConfig, { getSettings, substituteEnvironmentVars } from "utils/config/config";
 import {
   servicesFromConfig,
@@ -12,7 +15,6 @@ import {
   servicesFromKubernetes
 } from "utils/config/service-helpers";
 import { cleanWidgetGroups, widgetsFromConfig } from "utils/config/widget-helpers";
-import { commandsFromConfig } from "./command-helpers";
 
 /**
  * Compares services by weight then by name.
@@ -115,9 +117,9 @@ export async function servicesResponse() {
   if (configuredCommands) {
     configuredServices.forEach((g) => {
       g.services.forEach((s) => {
-        console.log(s)
-        if (s.widget != null && s.widget.type == "commands") {
-          s.widget.commands = configuredCommands.find((group) => group.name == s.commandgroup).commands
+        const service = s;
+        if (service.widget != null && service.widget.type === "commands") {
+          service.widget.commands = configuredCommands.find((group) => group.name === service.commandgroup).commands
         }
       });
     })

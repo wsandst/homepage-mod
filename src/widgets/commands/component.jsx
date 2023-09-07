@@ -1,13 +1,9 @@
-import { useTranslation } from "next-i18next";
-import useSWRMutation from 'swr'
+import { useState } from 'react';
 
 import Container from "components/services/widget/container";
-import Block from "components/services/widget/block";
 import BlockButton from "components/services/widget/blockbutton";
-import useWidgetAPI from "utils/proxy/use-widget-api";
-import Modal from "components/services/widget/commandmodal";
-
-import { useState } from 'react';
+import ArgumentsModal from "components/services/widget/modals/arguments";
+import ConfirmModal from "components/services/widget/modals/confirm";
 
 
 const ButtonStates = {
@@ -24,71 +20,98 @@ const ButtonStateColorMap = {
   3: "rose"
 }
 
-async function runCommand(cmd, argumentValues, completeCallback) {
+// Run a command by calling the 'command' api endpoint, which allows
+// for the execution of predefined commands in the 'commands.yaml' config file
+async function apiRunCommand(cmd, argumentValues, completeCallback) {
   let commandUrl = `/api/commands?group=${cmd.group}&command=${cmd.name}`;
   if (argumentValues != null) {
-    commandUrl += "&arguments=" + argumentValues.map((value) => `"${value}"`).join(',')
+    commandUrl += `&args=${argumentValues.map((value) => `"${value}"`).join(',')}`
   }
   console.log("Command api url:", commandUrl);
-  let res = await fetch(commandUrl, {
+  const res = await fetch(commandUrl, {
     method: 'GET',
   })
-  completeCallback(res.status == 200);
-  console.log("Command result: ", res);
+  completeCallback(res.status === 200);
+  console.log("Command result: ", await res.json());
 }
   
 export default function Component({ service }) {
-  const { t } = useTranslation();
-
   const { widget } = service;
 
-  const commandGroup = service.commandgroup;
-  const buttonStates = widget.commands.map((cmd) => {
+  
+  // Setup various states
+  /* eslint-disable */
+  const buttonStates = widget.commands.map(() => {
     const [state, setState] = useState(ButtonStates.Idle);
-    return {state: state, setState: setState}
+    return {state, setState}
   });
+  /* eslint-enable */
 
-  const [modalShowState, setModalShowState] = useState(false);
-  const [modalCmdState, setModalCmdState] = useState(null);
+  const [argumentsModalShowState, setArgumentsModalShowState] = useState(false);
+  const [argumentsModalCmdState, setArgumentsModalCmdState] = useState(null);
 
+  const [confirmModalShowState, setConfirmModalShowState] = useState(false);
+  const [confirmModalCmdState, setConfirmModalCmdState] = useState(null);
+
+
+  // Create rows of commands matching the optional service 'rows' attribute
+  // Defaults to 3 buttons per row
   const commands = [];
-  for (var i = 0; i < widget.commands.length; i+= 3) {
-    commands.push(widget.commands.slice(i, i+3))
+  const buttonsPerRow = service.rows == null ? 3 : service.rows;
+  for (let i = 0; i < widget.commands.length; i += buttonsPerRow) {
+    commands.push(widget.commands.slice(i, i+buttonsPerRow))
   }
   
-  const onCommandButtonPress = (cmd, i) => {
-    if (cmd.arguments) {
-      setModalCmdState(cmd);
-      setModalShowState(true);
-    }
-    else {
-      buttonStates[i].setState(ButtonStates.Running); 
-      runCommand(cmd, null, (success) =>  {
-          buttonStates[i].setState(success ? ButtonStates.Success : ButtonStates.Failure);
-      });
-    }
+  const runCommand = (cmd, values) => {
+    buttonStates[cmd.index].setState(ButtonStates.Running); 
+    apiRunCommand(cmd, values, (success) =>  {
+      buttonStates[cmd.index].setState(success ? ButtonStates.Success : ButtonStates.Failure);
+    });
   }
 
-  const onArgumentsSubmitted = (cmd, values) => {
-    runCommand(cmd, values, () => {});
+  // Handle a command button being pressed
+  const onCommandButtonPress = (cmd, i) => {
+    console.log(cmd);
+    const cmdCopy = cmd;
+    cmdCopy.index = i;
+    if (cmd.arguments) {
+      // If the command requires arguments, provide a modal which allows for
+      // input of these arguments
+      setArgumentsModalCmdState(cmd);
+      setArgumentsModalShowState(true);
+    }
+    else if (cmd.confirm) {
+      // If the command requires confirmation, provide a confirmation modal
+      setConfirmModalCmdState(cmd);
+      setConfirmModalShowState(true);
+    }
+    else {
+      // Otherwise, just run the command
+      runCommand(cmd, null);
+    }
   }
 
   return (
     <div>
-      <Modal show={modalShowState} 
-              cmd={modalCmdState} 
-              setShow={setModalShowState} 
-              onSubmitCallback={onArgumentsSubmitted} 
+      <ArgumentsModal show={argumentsModalShowState} 
+              cmd={argumentsModalCmdState} 
+              setShow={setArgumentsModalShowState} 
+              onSubmitCallback={(cmd, values) => runCommand(cmd, values)} 
+      />
+      <ConfirmModal show={confirmModalShowState} 
+              cmd={confirmModalCmdState} 
+              setShow={setConfirmModalShowState} 
+              onConfirmCallback={(cmd) => runCommand(cmd, null)} 
       />
       {commands.map((groupedCommands, j) =>
-        <Container service={service}>
+        <Container service={service} key={`${groupedCommands.map((c) => c.name).join('')}`} >
         {groupedCommands.map((cmd, i) =>
-            <BlockButton key={cmd.name} 
-                          running={buttonStates[j*3+i].state == ButtonStates.Running} 
-                          outlineColor={ButtonStateColorMap[buttonStates[j*3+i].state]}
+            <BlockButton key={`${cmd.group}-${cmd.name}`} 
+                          running={buttonStates[j*buttonsPerRow+i].state === ButtonStates.Running} 
+                          outlineColor={ButtonStateColorMap[buttonStates[j*buttonsPerRow+i].state]}
                           label={cmd.name} 
                           onClick={() => {
-                            onCommandButtonPress(cmd, j*3+i)
+                            onCommandButtonPress(cmd, j*buttonsPerRow+i)
                           }} 
             />
         )}
