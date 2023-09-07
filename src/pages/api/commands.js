@@ -58,7 +58,7 @@ export default async function handler(req, res) {
     console.log("Attempting to run command ", commandItem);
     console.log(`Configurated command as: '${commandString}'`);
     const outputFile = `${group}-${command}-${nanoid(9)}-output.txt`
-    const commandRunner = path.join(process.cwd(), "config", "commandrunner");
+    const commandRunner = path.join(process.cwd(), "config", "commandrunner.pipe");
     var commandRunnerFile = createWriteStream(commandRunner);
     commandRunnerFile.write(`${commandString} &> ../logs/${outputFile}\n`);
     commandRunnerFile.close();
