@@ -67,7 +67,7 @@ export default async function handler(req, res) {
     const outputFile = `${group}-${command}-${nanoid(9)}-output.txt`
     const commandRunner = path.join(process.cwd(), "config", "commandrunner.pipe");
     const commandRunnerFile = createWriteStream(commandRunner);
-    commandRunnerFile.write(`${commandString} &> ../logs/${outputFile}\n`);
+    commandRunnerFile.write(`${commandString} &> "../logs/${outputFile}"\n`);
     commandRunnerFile.close();
 
     const timeout = 7000;

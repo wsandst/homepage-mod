@@ -1,1 +1,1 @@
-ssh dross "tailscale funnel 443 off && tailscale serve reset"
+ssh dross "~/remote-scripts/FUNNEL_DISABLE.sh"

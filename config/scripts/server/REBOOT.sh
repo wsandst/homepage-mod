@@ -1,2 +1,2 @@
-# Reboot dross erver
-ssh dross "sudo shutdown now"
+# Reboot dross server
+ssh dross "sudo reboot"
