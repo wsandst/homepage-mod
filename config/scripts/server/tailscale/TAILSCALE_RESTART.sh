@@ -1,1 +1,0 @@
-ssh dross "tailscale down --accept-risk=lose-ssh && tailscale up"

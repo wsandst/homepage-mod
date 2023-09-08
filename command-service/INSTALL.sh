@@ -19,6 +19,6 @@ chmod +x /usr/bin/COMMANDRUNNER.sh
 sed -i "s|HOMEPAGE_CONFIG_DIR_TEMPLATE|$CONFIG_PATH|g" /usr/bin/COMMANDRUNNER.sh
 
 # Setup FIFO
-rm ../config/commandrunner.pipe
-mkfifo ../config/commandrunner.pipe
-chmod 666 ../config/commandrunner.pipe
+rm $CONFIG_PATH/commandrunner.pipe
+mkfifo $CONFIG_PATH/commandrunner.pipe
+chmod 666 $CONFIG_PATH/commandrunner.pipe

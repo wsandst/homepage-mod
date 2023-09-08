@@ -1,1 +1,0 @@
-ssh dross "~/remote-scripts/FUNNEL_DISABLE.sh"
